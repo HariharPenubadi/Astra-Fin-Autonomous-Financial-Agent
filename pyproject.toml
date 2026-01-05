@@ -1,0 +1,25 @@
+[project]
+name = "astra-fin"
+version = "0.1.0"
+description = "Autonomous Financial Research System with Local LLMs"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph",
+    "langchain",
+    "langchain-ollama",
+    "langchain-community",
+    "tavily-python",
+    "qdrant-client",
+    "python-dotenv",
+    "pydantic"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "black"
+]
+
+[tool.setuptools]
+packages = ["src"]
