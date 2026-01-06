@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: astra-fin
+Version: 0.1.0
+Summary: Autonomous Financial Research System with Local LLMs
+Requires-Python: >=3.11
+Requires-Dist: langgraph
+Requires-Dist: langchain
+Requires-Dist: langchain-ollama
+Requires-Dist: langchain-community
+Requires-Dist: tavily-python
+Requires-Dist: qdrant-client
+Requires-Dist: python-dotenv
+Requires-Dist: pydantic
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: black; extra == "dev"

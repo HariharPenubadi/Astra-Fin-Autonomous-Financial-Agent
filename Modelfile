@@ -1,5 +1,4 @@
-# Ensure this matches the filename you download from Colab
-FROM ./astra_finance_model.Q4_K_M.gguf
+FROM ./llama-3-8b-instruct.Q4_K_M.gguf
 
 SYSTEM "You are Astra, a Senior Investment Analyst. Answer with strict financial data. Be concise."
 PARAMETER temperature 0.1

@@ -29,7 +29,7 @@ if __name__ == "__main__":
     app = build_graph()
 
     print("Initailizing Astra Fin")
-    user_input = "What does the internal memo say about Project Titan?"
+    user_input = "What is the latest stock price for Apple (AAPL)?"
 
     result = app.invoke({
         "messages": [user_input],

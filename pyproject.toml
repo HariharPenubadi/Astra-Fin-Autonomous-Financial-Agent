@@ -11,7 +11,8 @@ dependencies = [
     "tavily-python",
     "qdrant-client",
     "python-dotenv",
-    "pydantic"
+    "pydantic",
+    "langchain-qdrant"
 ]
 
 [project.optional-dependencies]

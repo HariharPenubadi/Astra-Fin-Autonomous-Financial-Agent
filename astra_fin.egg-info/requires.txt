@@ -1,0 +1,13 @@
+langgraph
+langchain
+langchain-ollama
+langchain-community
+tavily-python
+qdrant-client
+python-dotenv
+pydantic
+
+[dev]
+pytest
+ruff
+black
