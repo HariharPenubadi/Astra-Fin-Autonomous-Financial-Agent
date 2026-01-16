@@ -1,9 +1,11 @@
 def classify_risk(profile):
-    risk = profile["risk"]
-    horizon = profile["horizon"]
+    risk = profile.get("risk")
+    horizon = profile.get("horizon")
 
     if risk == "low":
         return "conservative"
-    if risk == "high" and horizon == "long":
+
+    if risk == "high":
         return "aggressive"
+
     return "balanced"

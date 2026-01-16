@@ -7,10 +7,8 @@ import asyncio
 
 from src.graph.astra_graph import build_graph
 
-# Initialize
 app = FastAPI(title="Astra Fin API")
 
-# Allow React to talk to Python (CORS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load the Brain
 graph = build_graph()
 
 
@@ -39,25 +36,24 @@ async def event_generator(query: str):
             for node, values in chunk.items():
                 data = {}
 
-                # 1. BRAIN (Planner)
                 if node == "planner":
                     data = {
                         "type": "brain",
                         "content": f"Intent: {values.get('intent', 'unknown').upper()}"
                     }
 
-                # 2. MEMORY (Profile)
+
                 elif node == "investor_profile":
-                    if values.get("profile_updated"):
+
+                    if values.get("profile_updated") is True:
                         p = values.get("investor_profile", {})
                         data = {
                             "type": "memory",
-                            "content": f"Budget: {p.get('budget')} {p.get('currency')} | Risk: {p.get('risk')}"
+                            "content": f"Budget: {p.get('budget', 'Unknown')} {p.get('currency', 'USD')} | Risk: {p.get('risk', 'Unknown')}"
                         }
 
-                # 3. ADVISOR / AGENT (Final Answer)
                 elif node in ["advisor", "finance_agent", "reasoner"]:
-                    # Check if it's a final answer
+
                     if "answer" in values:
                         data = {
                             "type": "response",
@@ -65,9 +61,7 @@ async def event_generator(query: str):
                         }
 
                 if data:
-                    # SSE Format: "data: {json}\n\n"
                     yield f"data: {json.dumps(data)}\n\n"
-                    # Small delay to ensure React renders smoothly
                     await asyncio.sleep(0.05)
 
     except Exception as e:
