@@ -1,0 +1,14 @@
+[
+  {
+    "question": "What is Apple revenue in 2023?",
+    "expected_entities": ["Apple", "revenue", "2023"]
+  },
+  {
+    "question": "What is Microsoft's market capitalization?",
+    "expected_entities": ["Microsoft", "market capitalization"]
+  },
+  {
+    "question": "What is Tesla's revenue in 2022?",
+    "expected_entities": ["Tesla", "revenue", "2022"]
+  }
+]

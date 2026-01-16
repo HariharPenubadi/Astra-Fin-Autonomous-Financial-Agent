@@ -1,40 +1,29 @@
-from langgraph.graph import StateGraph, END
-from src.state import AgentState
-from src.agents import researcher, analyst, critic
-from dotenv import load_dotenv
+from src.graph.astra_graph import build_graph
+from src.voice.voice_loop import run_voice
+from src.memory.short_term import add_turn
 
-load_dotenv()
+def run():
+    mode = input("Mode (text/voice): ").strip().lower()
 
-def build_graph():
+    if mode == "voice":
+        run_voice()
+        return
 
-    workflow = StateGraph(AgentState)
+    graph = build_graph()
+    while True:
+        query = input("\nUser > ")
+        if query.lower() in ["exit", "quit"]:
+            break
 
-    workflow.add_node("researcher", researcher)
-    workflow.add_node("analyst", analyst)
+        result = graph.invoke({"query": query})
 
-    workflow.set_entry_point("researcher")
-    workflow.add_edge("researcher", "analyst")
-
-    def check_quality(state):
-        result = critic(state)
-        if result == "approved" or state.get("revision_count", 0) > 2:
-            return END
+        if "answer" in result and result["answer"]:
+            print(f"\nASTRA > {result['answer']}")
+            add_turn(query, result["answer"])
         else:
-            return "researcher"
+            print("\nASTRA > I couldn’t generate a confident answer yet.")
+            add_turn(query, result["answer"])
 
-    workflow.add_conditional_edges("analyst", check_quality)
-    return workflow.compile()
 
 if __name__ == "__main__":
-    app = build_graph()
-
-    print("Initailizing Astra Fin")
-    user_input = "What does the internal memo say about Project Titan?"
-
-    result = app.invoke({
-        "messages": [user_input],
-        "revision_count": 0
-    })
-
-    print("\n--- FINAL OUTPUT ---")
-    print(result["messages"][-1])
+    run()

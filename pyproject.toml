@@ -1,18 +1,21 @@
 [project]
 name = "astra-fin"
-version = "0.1.0"
-description = "Autonomous Financial Research System with Local LLMs"
+version = "0.2.0"
+description = "The ONE Financial AI Agent"
 requires-python = ">=3.11"
 dependencies = [
+
     "langgraph",
     "langchain",
     "langchain-ollama",
     "langchain-community",
-    "tavily-python",
-    "qdrant-client",
-    "python-dotenv",
     "pydantic",
-    "langchain-qdrant"
+    "python-dotenv",
+    "qdrant-client",
+    "langchain-qdrant",
+    "chainlit",
+    "httpx",
+    "yfinance"
 ]
 
 [project.optional-dependencies]

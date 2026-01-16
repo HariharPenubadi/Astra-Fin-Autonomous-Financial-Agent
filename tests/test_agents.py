@@ -1,22 +1,41 @@
 import pytest
-from unittest.mock import MagicMock, patch
-from src.state import AgentState
-from src.agents import critic
+from unittest.mock import patch, MagicMock
+from src.tools import local_search_tool
 
-def test_critic_approval():
-    mock_state = {
-        "messages": ["This is a very long and detailed financial analysis report that definitely meets the length requirement."],
-        "research_data": "",
-        "revision_count": 0
-    }
-    result = critic(mock_state)
-    assert result == "approved"
+@patch("src.tools.httpx.get")
+def test_local_search_tool_success(mock_get):
 
-def test_critic_rejection():
-    mock_state = {
-        "messages": ["Too short."],
-        "research_data": "",
-        "revision_count": 0
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "results": [
+            {
+                "title": "Astra Fin Release",
+                "url": "http://example.com/news",
+                "content": "Astra Fin 2.0 is now live."
+            }
+        ]
     }
-    result = critic(mock_state)
-    assert result == "rejected"
+    mock_get.return_value = mock_response
+
+    result = local_search_tool.invoke("latest news")
+
+    assert "Astra Fin Release" in result
+    assert "http://example.com/news" in result
+
+@patch("src.tools.httpx.get")
+def test_local_search_tool_no_results(mock_get):
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"results": []}
+    mock_get.return_value = mock_response
+
+    result = local_search_tool.invoke("weird obscure query")
+
+    assert result == "No results found."
+
+@patch("src.tools.httpx.get")
+def test_local_search_tool_error(mock_get):
+    mock_get.side_effect = Exception("Connection refused")
+
+    result = local_search_tool.invoke("stock price")
+
+    assert "Search Error" in result
