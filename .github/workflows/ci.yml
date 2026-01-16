@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-brain:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,6 +24,6 @@ jobs:
         pip install .
         pip install pytest httpx
 
-    - name: Run Intelligence Tests
+    - name: Run Tests
       run: |
         pytest tests/test_brain.py -v
