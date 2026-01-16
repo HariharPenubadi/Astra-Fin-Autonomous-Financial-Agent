@@ -1,12 +1,17 @@
 import os
 from dotenv import load_dotenv
-os.environ["LANGCHAIN_TRACING_V2"] = "false"
+
 load_dotenv()
 
+
 class Settings:
-    QDRANT_URL = os.getenv("QDRANT_URL")
-    SEARXNG_URL = os.getenv("SEARXNG_URL")
-    MODEL_NAME = "astra-fin:latest"
-    EMBED_MODEL = "BAAI/bge-base-en-v1.5"
+    MODEL_NAME = os.getenv("MODEL_NAME", "astra-fin:latest")
+    EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-base-en-v1.5")
+    OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+    QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+    SEARXNG_URL = os.getenv("SEARXNG_URL", "http://localhost:8080")
+
+    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 settings = Settings()

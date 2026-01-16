@@ -23,48 +23,39 @@ def advisor(state):
     risk_type = classify_risk(profile)
     allocation = allocate_portfolio(risk_type, profile.get("market", "both"))
 
-
-    market_context = ""
+    specific_advice = ""
     if profile.get("currency") == "INR":
-        market_context = """
-        INDIAN MARKET EXAMPLES (Use these if user asks for specific names):
-        - SAFE / DEBT: 
-          * Liquid Funds: SBI Liquid Fund, HDFC Liquid Fund.
-          * Fixed Deposits (FDs): HDFC Bank FD, ICICI Bank FD.
-        - LOW RISK EQUITY (Large Cap): 
-          * Passive: UTI Nifty 50 Index Fund, Navi Nifty 50.
-          * Active: Mirae Asset Large Cap.
-        - HIGH RISK EQUITY (Mid/Small Cap):
-          * Flexi Cap: Parag Parikh Flexi Cap Fund.
-          * Small Cap: Quant Small Cap Fund, Nippon India Small Cap.
-        - GOLD: Sovereign Gold Bonds (SGB) (Best), Nippon India Gold BEES (ETF).
-        """
+        if risk_type == "aggressive":
+            specific_advice = "For Equity, suggest 'Quant Small Cap Fund' or 'Nippon India Small Cap'. For Debt, suggest 'HDFC Short Term Debt Fund'."
+        elif risk_type == "conservative":
+            specific_advice = "For Equity, suggest 'UTI Nifty 50 Index Fund'. For Debt, suggest 'HDFC Liquid Fund' or 'Bank FDs'."
+        else:  # Balanced
+            specific_advice = "For Equity, suggest 'Parag Parikh Flexi Cap Fund'. For Debt, suggest 'Corporate Bond Funds'."
     else:
-        market_context = """
-        US/GLOBAL MARKET EXAMPLES:
-        - SAFE: US Treasury Bills (BIL), Vanguard Total Bond Market (BND).
-        - EQUITY (Growth): Vanguard S&P 500 (VOO), Invesco QQQ (Tech/High Risk).
-        - DIVIDEND: Schwab US Dividend Equity (SCHD).
-        """
+        # USD Fallback
+        if risk_type == "aggressive":
+            specific_advice = "Suggest 'QQQ' (Tech ETF) and 'Vanguard Growth ETF'."
+        else:
+            specific_advice = "Suggest 'Vanguard Total Stock Market (VTI)' and 'US Treasury Bills'."
 
     system_prompt = f"""
-    You are ASTRA, an expert financial advisor.
+    You are ASTRA, a precise financial advisor.
 
-    USER PROFILE:
+    USER DATA:
     - Budget: {profile['budget']} {profile['currency']}
-    - Risk Level: {risk_type.upper()}
-    - Calculated Allocation: {allocation}
+    - Risk Profile: {risk_type.upper()}
+    - Allocation: {allocation}
+    - Specific Recommendations To Use: "{specific_advice}"
 
-    {market_context}
+    TASK:
+    Generate a response using EXACTLY this structure:
+
+    1. **Analysis**: "Based on your total budget of {profile['budget']} {profile['currency']}..."
+    2. **Allocation Plan**: List the breakdown (Equity, Debt, Gold).
+    3. **Specific Recommendations**: You MUST list the specific fund names provided above. (e.g., "For Equity, I recommend...")
+    4. **Why?**: Brief explanation.
 
     USER QUERY: "{query}"
-
-    GUIDELINES:
-    1. **Direct Answer:** If user asks "Where to invest?", start with the Allocation Plan (Bullet points with ₹ amounts).
-    2. **Be Specific:** If the user asks for "Exact names" or "Which fund?", YOU MUST pick examples from the list above. Do not be vague.
-    3. **Explain Why:** Briefly explain why a specific choice fits their {risk_type} profile (e.g., "Quant Small Cap fits your high-risk preference because...").
-    4. **Context Update:** If the user JUST changed their risk (e.g., "What if I want high risk?"), acknowledge the switch: "Switching to a High Risk strategy..."
-    5. **Disclaimer:** Keep it brief at the bottom.
     """
 
     response = llm.invoke(system_prompt).content

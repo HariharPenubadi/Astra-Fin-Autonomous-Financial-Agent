@@ -1,36 +1,61 @@
 import chainlit as cl
-from src.main import app
+from src.graph.astra_graph import build_graph
+
+# Build the graph once
+graph = build_graph()
 
 
 @cl.on_chat_start
 async def start():
-    await cl.Message(content="**Astra Fin Pro** is ready. \nAsk me about stocks, news, or internal memos.").send()
+    await cl.Message(
+        content="**👋 Astra Fin Pro is ready.**\n\nTry asking: *'I have 50k INR and want high risk.'*").send()
 
 
 @cl.on_message
 async def main(message: cl.Message):
-    # Initialize the container for the final answer
-    msg = cl.Message(content="")
+    # Initialize the stream container
+    final_answer = cl.Message(content="")
 
-    # Pass user input to the graph
-    inputs = {
-        "question": message.content,
-        "messages": [message.content],
-        "revision_count": 0
-    }
+    # 1. Show the "Thinking" Loader
+    async with cl.Step(name="Astra Brain", type="run") as step:
+        step.input = message.content
 
-    try:
-        async for output in app.astream(inputs):
-            for node_name, value in output.items():
+        inputs = {"query": message.content}
 
-                if node_name == "analyst" and "messages" in value:
-                    last_msg = value["messages"][-1]
+        # 2. Stream the Graph Events
+        async for chunk in graph.astream(inputs, stream_mode="updates"):
+            for node, values in chunk.items():
 
-                    content = last_msg.content if hasattr(last_msg, "content") else str(last_msg)
+                # VISUALIZE: The Planner (Brain)
+                if node == "planner":
+                    intent = values.get("intent", "unknown")
+                    await cl.Message(
+                        author="🧠 Brain",
+                        content=f"Identified Intent: **{intent.upper()}**",
+                        parent_id=message.id
+                    ).send()
 
-                    await msg.stream_token(content)
+                # VISUALIZE: The Memory (Profile)
+                elif node == "investor_profile":
+                    if values.get("profile_updated"):
+                        p = values.get("investor_profile", {})
+                        details = f"Budget: {p.get('budget')} {p.get('currency')} | Risk: {p.get('risk')}"
+                        await cl.Message(
+                            author="📝 Memory",
+                            content=f"**Profile Updated:**\n{details}",
+                            parent_id=message.id
+                        ).send()
 
-    except Exception as e:
-        await msg.stream_token(f"Error: {str(e)}")
+                # VISUALIZE: The Advisor (Stream Response)
+                elif node == "advisor":
+                    # Stream the final answer chunks
+                    response = values.get("answer", "")
+                    await final_answer.stream_token(response)
 
-    await msg.update()
+                # VISUALIZE: Finance Agent / Reasoner
+                elif node in ["finance_agent", "reasoner"]:
+                    response = values.get("answer", "")
+                    await final_answer.stream_token(response)
+
+    # 3. Final Send
+    await final_answer.send()
